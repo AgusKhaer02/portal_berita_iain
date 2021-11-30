@@ -133,9 +133,9 @@ class _DetailBeritaState extends State<DetailBerita> {
               Padding(
                 padding: const EdgeInsets.only(right: 5.0),
                 child: GFIconButton(
-                    color: Color(0xFF3B5998),
+                    color: const Color(0xFF3B5998),
                     shape: GFIconButtonShape.circle,
-                    icon: Icon(
+                    icon: const Icon(
                       IconData(
                         0xe904,
                         fontFamily: 'icomoon',
@@ -147,9 +147,9 @@ class _DetailBeritaState extends State<DetailBerita> {
               Padding(
                 padding: const EdgeInsets.only(right: 5.0),
                 child: GFIconButton(
-                    color: Color(0xFF00ACEE),
+                    color: const Color(0xFF00ACEE),
                     shape: GFIconButtonShape.circle,
-                    icon: Icon(
+                    icon: const Icon(
                       IconData(
                         0xe90f,
                         fontFamily: 'icomoon',
@@ -159,9 +159,9 @@ class _DetailBeritaState extends State<DetailBerita> {
                     onPressed: () {}),
               ),
               GFIconButton(
-                  color: Color(0xFF25D366),
+                  color: const Color(0xFF25D366),
                   shape: GFIconButtonShape.circle,
-                  icon: Icon(
+                  icon: const Icon(
                     IconData(
                       0xe911,
                       fontFamily: 'icomoon',
@@ -186,7 +186,7 @@ class _DetailBeritaState extends State<DetailBerita> {
         Padding(
           padding: const EdgeInsets.only(left: 15.0),
           child: GFListTile(
-            avatar: GFAvatar(
+            avatar: const GFAvatar(
               backgroundImage: AssetImage('lib/assets/images/news1.png'),
             ),
             title: Padding(

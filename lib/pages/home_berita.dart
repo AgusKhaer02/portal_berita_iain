@@ -17,27 +17,27 @@ class HomeBerita extends StatefulWidget {
 }
 
 class _HomeBeritaState extends State<HomeBerita> {
-  List<listResponse.Result> listNews = [];
+  // yang dipanggil pada future builder harus berupa variable
+  // inti dari permasalahan kenapa api dipanggil terus karena function getListnews memiliki function future yang bercabang
 
-  Future<List<listResponse.Result>> _getListNews() async {
-    // panggil method dari class Api
-    return Api.getListBerita().then((value) {
-      setState(() {
-        // inisialisasi nilai pada variabel result dengan hasil response
-        listNews = value.result!;
-      });
-      return listNews;
-    }).catchError((msgError) {
-      print(msgError);
-    });
-  }
+  // #1 didalam variabel ini berisi method yang langsung dari class Api, ketika function getListBerita sudah tereksekusi maka akan return class response
+  // jadi jangan dibuat function future baru lagi di dalam class ini yang mana akan berakibat calling api secara terus menerus
+  Future<listResponse.ListBeritaResponse> listNews = Api.getListBerita();
 
-  // function yang diekseskusi sebelum function build
-  @override
-  void initState() {
-    _getListNews();
-    super.initState();
-  }
+  // tidak menggunakan method ini karna ini akan menjadi API yang di call berkali kali
+  // ini yang akan menyebabkan trafic padat pada server, maka solusinya gunakan variabel listNews diatas
+  // Future<List<listResponse.Result>> _getListNews() async {
+  //   // panggil method dari class Api
+  //   return Api.getListBerita().then((value) {
+  //     setState(() {
+  //       // inisialisasi nilai pada variabel result dengan hasil response
+  //       listNews = value.result!;
+  //     });
+  //     return listNews;
+  //   }).catchError((msgError) {
+  //     print(msgError);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +46,17 @@ class _HomeBeritaState extends State<HomeBerita> {
         title: Text("Home Berita"),
       ),
       body: FutureBuilder(
-        future: _getListNews(),
-        builder: (context, snapshot) {
+        future: listNews,
+        builder:
+            (context, AsyncSnapshot<listResponse.ListBeritaResponse> snapshot) {
+          print("network keeps calling");
           // jika snapshot mempunyai data
           if (snapshot.hasData) {
-            return showList();
+            // #2
+            // untuk datanya jangan langsung dari variabel future tetapi langsung ambil dari snapshot
+            // karena datanya sudah jelas ada selama perintah ini didalam kondisi snapshot.hasData yaitu ketika snapshot memiliki data
+            // gunakan tanda !, bahwa ketika sudah masuk ke hasData, sudah pasti data sudah ada
+            return showList(snapshot.data!.result!);
             //  jika snapshot mengalami error
           } else if (snapshot.hasError) {
             return Center(
@@ -68,7 +74,10 @@ class _HomeBeritaState extends State<HomeBerita> {
     );
   }
 
-  Widget showList() {
+  // #3
+  // semua nilai yang dikirim oleh result pada FutureBuilder, itu sudah pasti memiliki nilai kecuali nilai yang ada pada class result
+  // entah akan berpotensi null atau tidak.
+  Widget showList(List<listResponse.Result> result) {
     return Column(
       children: [
         Row(
@@ -84,6 +93,7 @@ class _HomeBeritaState extends State<HomeBerita> {
               },
               child: Text("get Location"),
             ),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -95,11 +105,14 @@ class _HomeBeritaState extends State<HomeBerita> {
               },
               child: Text("image handling"),
             ),
+
           ],
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: listNews.length,
+            // #4 data list yang dipanggil itu bukan lagi berasal dari variable listNews melainkan dari data snapshot yang sudah
+            // dikirimkan dari FutureBuilder
+            itemCount: result.length,
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(top: 15.0),
@@ -109,7 +122,7 @@ class _HomeBeritaState extends State<HomeBerita> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailBerita(
-                          id: listNews[index].idBerita!,
+                          id: result[index].idBerita!,
                         ),
                       ),
                     );
@@ -139,10 +152,11 @@ class _HomeBeritaState extends State<HomeBerita> {
                         height: 79,
                         width: 85,
                         image: NetworkImage(
-                            Api.IMAGE_URL + listNews[index].gambar!),
+                            // #5
+                            Api.IMAGE_URL + result[index].gambar!),
                       ),
                       title: Text(
-                        listNews[index].judul!,
+                        result[index].judul!,
                         style: titleBold(),
                       ),
                       description: Container(),
@@ -150,7 +164,8 @@ class _HomeBeritaState extends State<HomeBerita> {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              listNews[index].tanggal!,
+                              // #6
+                              result[index].tanggal!,
                               style: descriptionSemibold(),
                             ),
                           ),
